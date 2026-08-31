@@ -5,11 +5,11 @@ import os
 # Registry of indices — add new ones here later, that's it
 INDICES = {
     "nifty50": {"ticker": "^NSEI", "label": "Nifty 50", "start": "1996-01-01"},
-    "midcap100": {"ticker": "MOM100.NS", "label": "Nifty Midcap 100 (ETF)", "start": "2019-01-01"},
-    "smallcap250": {"ticker": "HDFCSML250.NS", "label": "Nifty Smallcap 250 (ETF)", "start": "2020-01-01"},
+    "midcap100": {"ticker": "NIFTY_MIDCAP_100.NS", "label": "Nifty Midcap 100", "start": "1996-01-01"},
+    "smallcap250": {"ticker": "NIFTYSMLCAP250.NS", "label": "Nifty Smallcap 250", "start": "1996-01-01"},
 }
 
-OUTPUT_DIR = "data"
+OUTPUT_DIR = "public/data"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 for index_id, info in INDICES.items():
