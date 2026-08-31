@@ -1,13 +1,25 @@
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { NavBar } from '@/components/shared/NavBar'
+import { ComboBox } from '@/components/shared/ComboBox'
+import { INVESTEMENT_TYPES, MARKETS } from '@/constants/markets'
+import { TabSelect } from '@/components/shared/TabSelect'
 
 export const BackTester = () => {
+  const [market, setMarket] = useState<string | null>(null);
+  const [investmentType, setInvestmentType] = useState<string>('lumpsum');
+
   return (
     <div className="p-8 space-y-4">
-      <h1 className="text-3xl font-bold tracking-tight text-primary">Back Tester</h1>
-      <div className="rounded-lg border border-primary bg-primary/10 p-4">
-        primary token check
-      </div>
-      <Button>Run backtest</Button>
+      <NavBar/>
+      <ComboBox
+        options={MARKETS}
+        value={market}
+        onChange={setMarket}
+        placeholder="Select a market"
+        className="w-64"
+      />
+      {market && <p>Selected Market: {market}</p>}
+      <TabSelect options={INVESTEMENT_TYPES} value={investmentType} onChange={setInvestmentType} className='border-primary' label='Mode' />
     </div>
   )
 }

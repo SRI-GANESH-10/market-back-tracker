@@ -3,3 +3,8 @@ export const MARKETS = [
   { value: 'midcap100', label: 'Nifty Midcap 100' },
   { value: 'smallcap250', label: 'Nifty Smallcap 250' },
 ] as const
+
+export const INVESTEMENT_TYPES = [
+  { value: 'lumpsum', label: 'Lumpsum' },
+  { value: 'sip', label: 'SIP' },
+]
