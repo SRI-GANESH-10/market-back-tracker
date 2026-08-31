@@ -10,9 +10,10 @@ type InputLabelProps = {
     nonNegative?: boolean
     placeholder?: string
     className?: string
+    disabled?: boolean
 }
 
-export const InputLabel = ({ value, onChange, label, type = "text", nonNegative = false, placeholder, className }: InputLabelProps) => {
+export const InputLabel = ({ value, onChange, label, type = "text", nonNegative = false, placeholder, className, disabled=false }: InputLabelProps) => {
     return (
         <div className='flex gap-2 flex-col w-fit'>
             <Label>{label}</Label>
@@ -30,6 +31,7 @@ export const InputLabel = ({ value, onChange, label, type = "text", nonNegative 
                 }}
                 placeholder={placeholder}
                 className={cn('rounded-none', className)}
+                disabled={disabled}
             />
         </div>
     )

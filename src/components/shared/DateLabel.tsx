@@ -13,9 +13,12 @@ type DateLabelProps = {
     onChange: (date: Date | undefined) => void
     className?: string
     label?: string
+    /** Earliest selectable month — defaults to Jan 2005, the oldest index data we have. */
+    startMonth?: Date
+    endMonth?: Date
 }
 
-export const DateLabel = ({ date, onChange, className, label = "Select Date" }: DateLabelProps) => {
+export const DateLabel = ({ date, onChange, className, label = "Select Date", startMonth = new Date(2005, 0), endMonth = new Date() }: DateLabelProps) => {
     const [open, setOpen] = useState(false)
 
     return (
@@ -36,6 +39,10 @@ export const DateLabel = ({ date, onChange, className, label = "Select Date" }: 
                 <PopoverContent className="w-(--anchor-width) p-0" align="start">
                     <Calendar
                         mode="single"
+                        captionLayout="dropdown"
+                        startMonth={startMonth}
+                        endMonth={endMonth}
+                        disabled={{ before: startMonth, after: endMonth }}
                         selected={date}
                         defaultMonth={date}
                         onSelect={(next) => {
