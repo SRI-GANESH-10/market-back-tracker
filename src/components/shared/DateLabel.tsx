@@ -1,0 +1,52 @@
+import { useState } from "react"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
+type DateLabelProps = {
+    date?: Date
+    onChange: (date: Date | undefined) => void
+    className?: string
+    label?: string
+}
+
+export const DateLabel = ({ date, onChange, className, label = "Select Date" }: DateLabelProps) => {
+    const [open, setOpen] = useState(false)
+
+    return (
+        <div className="flex gap-2 flex-col w-fit">
+            <Label>{label}</Label>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger
+                    render={
+                        <Button
+                            variant="outline"
+                            className={cn("w-56 justify-start font-normal", !date && "text-muted-foreground", className)}
+                        >
+                            <CalendarIcon />
+                            {date ? format(date, "dd MMM yyyy") : "Pick a date"}
+                        </Button>
+                    }
+                />
+                <PopoverContent className="w-(--anchor-width) p-0" align="start">
+                    <Calendar
+                        mode="single"
+                        selected={date}
+                        defaultMonth={date}
+                        onSelect={(next) => {
+                            if (!next) return
+                            onChange(next)
+                            setOpen(false)
+                        }}
+                        className="w-full"
+                    />
+                </PopoverContent>
+            </Popover>
+        </div>
+    )
+}

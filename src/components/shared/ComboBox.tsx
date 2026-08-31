@@ -6,6 +6,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox"
+import { cn } from "@/lib/utils"
 
 export type ComboBoxOption = { value: string; label: string }
 
@@ -41,7 +42,7 @@ export const ComboBox = ({
         placeholder={placeholder}
         disabled={disabled}
         showClear
-        className={className}
+        className={cn('rounded-none', className)}
       />
       <ComboboxContent>
         <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
