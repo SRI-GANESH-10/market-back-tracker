@@ -8,7 +8,8 @@ export const useMarketCagr = (market: string | null, date: Date | undefined, amo
     const data = useSelectMarketType(market)
 
     return useMemo(() => {
-        const startRow = date ? data.find((row) => new Date(row.date) >= date) : undefined
+        const startIdx = date ? data.findIndex((row) => new Date(row.date) >= date) : -1
+        const startRow =  startIdx === -1 ? undefined : data[startIdx];
         const endRow = data.at(-1)
         const firstDate = data[0]?.date
 
@@ -17,14 +18,24 @@ export const useMarketCagr = (market: string | null, date: Date | undefined, amo
         const years = (new Date(endRow.date).getTime() - new Date(startRow.date).getTime()) / MS_PER_YEAR
         if (years <= 0) return { data, startRow, endRow, firstDate, cagr: null }
 
+        const seriesData =  data.slice(startIdx)?.map((row)=>{
+            return {
+                date: row.date,
+                close: row.close,
+                finalValue: (amount / startRow.close) * row.close,
+                cagr: row.date === startRow.date ? 0 : calculateCagr({ initialValue: startRow.close, finalValue: row.close, years: (new Date(row.date).getTime() - new Date(startRow.date).getTime()) / MS_PER_YEAR }),
+            }
+        });
+
         return {
+            seriesData,
             data,
             startRow,
             endRow,
             firstDate,
             years,
-            finalValue: (amount / startRow.close) * endRow.close,
-            cagr: calculateCagr({ initialValue: startRow.close, finalValue: endRow.close, years }),
+            finalValue: seriesData.at(-1)?.finalValue,
+            cagr: seriesData.at(-1)?.cagr,
         }
     }, [data, date, amount])
 }
