@@ -4,6 +4,13 @@ import { calculateCagr } from '@/hooks/useCalculateCagr'
 
 const MS_PER_YEAR = 1000 * 60 * 60 * 24 * 365.25
 
+export type SeriesData = {
+    date: string
+    close: number
+    finalValue: number
+    cagr: number
+}
+
 export const useMarketCagr = (market: string | null, date: Date | undefined, amount: number) => {
     const data = useSelectMarketType(market)
 
@@ -18,7 +25,7 @@ export const useMarketCagr = (market: string | null, date: Date | undefined, amo
         const years = (new Date(endRow.date).getTime() - new Date(startRow.date).getTime()) / MS_PER_YEAR
         if (years <= 0) return { data, startRow, endRow, firstDate, cagr: null }
 
-        const seriesData =  data.slice(startIdx)?.map((row)=>{
+        const seriesData: SeriesData[] =  data.slice(startIdx)?.map((row)=>{
             return {
                 date: row.date,
                 close: row.close,

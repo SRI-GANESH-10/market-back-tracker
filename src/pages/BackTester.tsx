@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useActionState, useState } from 'react'
 import { NavBar } from '@/components/shared/NavBar'
 import { ComboBox } from '@/components/shared/ComboBox'
 import { INVESTEMENT_TYPES, MARKETS } from '@/constants/markets'
@@ -8,6 +8,8 @@ import { DateLabel } from '@/components/shared/DateLabel'
 import { useMarketCagr } from '@/hooks/useMarketCagr'
 import { Button } from '@/components/ui/button'
 import { StatCard } from '@/components/shared/StatCard'
+import { GrowthChart } from '@/components/shared/GrowthChart'
+import { useAnimatedSeries } from '@/hooks/useAnimatedSeries'
 
 type InvestmentType = 'lumpsum' | 'sip'
 
@@ -30,11 +32,13 @@ export const BackTester = () => {
   const [sipDays, setSipDays] = useState<number | string>(30)
   const [submitted, setSubmitted] = useState<Submission | null>(null)
 
-  const { startRow, endRow, years, finalValue, cagr } = useMarketCagr(
+  const { seriesData,startRow, endRow, years, finalValue, cagr } = useMarketCagr(
     submitted?.market ?? null,
     submitted?.date,
     submitted?.amount ?? 0
   )
+
+  const { currentData, visibleData, isPlaying} = useAnimatedSeries(seriesData);
 
   const isSip = investmentType === 'sip'
   const canRun = !!market && !!date && Number(amount) > 0
@@ -47,10 +51,10 @@ export const BackTester = () => {
   const profit = finalValue !== undefined ? finalValue - Number(submitted?.amount ?? 0) : undefined
 
   const stats = [
-    { title: 'CAGR', value: cagr !== null ? `${cagr}%` : 'N/A' },
-    { title: 'Final Value', value: finalValue !== undefined ? finalValue.toFixed(2) : 'N/A' },
-    { title: 'Profit', value: profit !== undefined ? profit.toFixed(2) : 'N/A' },
-    { title: 'Years', value: years ?? 'N/A' },
+    { title: 'CAGR', value: currentData?.cagr !== null ? `${currentData?.cagr}%` : 'N/A' },
+    { title: 'Final Value', value: currentData?.finalValue !== undefined ? currentData?.finalValue.toFixed(2) : 'N/A' },
+    // { title: 'Profit', value: profit !== undefined ? profit.toFixed(2) : 'N/A' },
+    // { title: 'Years', value: currentData?.years ?? 'N/A' },
   ]
 
   return (
@@ -120,6 +124,12 @@ export const BackTester = () => {
           </FieldCard>
         ))}
       </div>
+
+      {seriesData?.length ? (
+        <FieldCard>
+          <GrowthChart data={visibleData} />
+        </FieldCard>
+      ) : null}
     </div>
   )
 }
