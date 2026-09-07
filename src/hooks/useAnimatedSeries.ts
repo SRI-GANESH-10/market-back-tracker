@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SeriesData } from "@/lib/backtest";
 
-export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, runId: number) => {
+/** Gap between graph points at 1x. 2x halves it, 3x thirds it. */
+export const PAINT_MS = 240
+
+export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, runId: number, speed = 1) => {
     const [currIndex, setCurrIndex] = useState(0);
+
+    // Read through a ref so changing speed retimes the next tick instead of
+    // restarting the replay from row 0.
+    const speedRef = useRef(speed)
+    useEffect(() => { speedRef.current = speed }, [speed])
 
     useEffect(() => {
         const len = seriesData?.length ?? 0
@@ -10,12 +18,14 @@ export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, runId: n
 
         setCurrIndex(0);
         let i = 0
-        const id = setInterval(() => {
+        // A self-scheduling timeout, not setInterval: the delay has to be re-read
+        // every tick for a mid-replay speed change to take effect.
+        let id = setTimeout(function tick() {
             setCurrIndex(++i)
-            if (i >= len) clearInterval(id)
-        }, 1)
+            if (i < len) id = setTimeout(tick, PAINT_MS / speedRef.current)
+        }, PAINT_MS / speedRef.current)
 
-        return () => clearInterval(id)
+        return () => clearTimeout(id)
     }, [seriesData, runId])
 
     const visibleData = seriesData?.slice(0, currIndex) ?? []

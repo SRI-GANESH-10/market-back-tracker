@@ -29,6 +29,9 @@ export const BackTester = () => {
   const [sipFrequency, setSipFrequency] = useState<SipFrequency>('monthly')
   const [submitted, setSubmitted] = useState<Submission | null>(null)
   const [runId, setRunId] = useState(0)
+  // playback only -- deliberately not part of Submission, so changing it does
+  // not re-run the backtest or rewind the replay
+  const [speed, setSpeed] = useState(1)
 
   const { seriesData, returnMetric } = useBacktest(
     submitted?.market ?? null,
@@ -109,7 +112,13 @@ export const BackTester = () => {
         </FieldCard>
       </div>
 
-      <BacktestResult seriesData={seriesData} returnMetric={returnMetric} runId={runId} />
+      <BacktestResult
+        seriesData={seriesData}
+        returnMetric={returnMetric}
+        runId={runId}
+        speed={speed}
+        onSpeedChange={setSpeed}
+      />
     </div>
   )
 }
