@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
 import type { SeriesData } from "./useMarketCagr";
 
-
-export const useAnimatedSeries = (seriesData: SeriesData[] | undefined) => {
-
+export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, runId: number) => {
     const [currIndex, setCurrIndex] = useState(0);
-    useEffect(() => {
 
-        if (!seriesData?.length) return
-        setCurrIndex(0); // Reset the current index whenever the series data changes
+    useEffect(() => {
+        const len = seriesData?.length ?? 0
+        if (!len) return
+
+        setCurrIndex(0);
+        let i = 0
         const id = setInterval(() => {
-            setCurrIndex((i) => Math.min(i + 1, seriesData.length))
+            setCurrIndex(++i)
+            if (i >= len) clearInterval(id)
         }, 100)
 
         return () => clearInterval(id)
-    }, [seriesData])
-   
+    }, [seriesData, runId])
+
     const visibleData = seriesData?.slice(0, currIndex) ?? []
     const currentData = visibleData.at(-1) ?? null
 

@@ -7,9 +7,8 @@ import { InputLabel } from '@/components/shared/Inputlabel'
 import { DateLabel } from '@/components/shared/DateLabel'
 import { useMarketCagr } from '@/hooks/useMarketCagr'
 import { Button } from '@/components/ui/button'
-import { StatCard } from '@/components/shared/StatCard'
-import { GrowthChart } from '@/components/shared/GrowthChart'
-import { useAnimatedSeries } from '@/hooks/useAnimatedSeries'
+import { FieldCard } from '@/components/shared/FieldCard'
+import { BacktestResult } from '@/components/shared/BacktestResult'
 
 type InvestmentType = 'lumpsum' | 'sip'
 
@@ -19,10 +18,6 @@ type Submission = {
   amount: number
 }
 
-const FieldCard = ({ children }: { children: React.ReactNode }) => (
-  <div className="border p-4">{children}</div>
-)
-
 export const BackTester = () => {
   const [market, setMarket] = useState<string | null>(null)
   const [investmentType, setInvestmentType] = useState<InvestmentType>('lumpsum')
@@ -30,6 +25,7 @@ export const BackTester = () => {
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [sipDays, setSipDays] = useState<number | string>(30)
   const [submitted, setSubmitted] = useState<Submission | null>(null)
+  const [runId, setRunId] = useState(0)
 
   const { seriesData } = useMarketCagr(
     submitted?.market ?? null,
@@ -37,20 +33,14 @@ export const BackTester = () => {
     submitted?.amount ?? 0
   )
 
-  const { currentData, visibleData } = useAnimatedSeries(seriesData)
-
   const isSip = investmentType === 'sip'
   const canRun = !!market && !!date && Number(amount) > 0
 
   const handleBacktest = () => {
     if (!canRun) return
     setSubmitted({ market: market!, date: date!, amount: Number(amount) })
+    setRunId((n) => n + 1)
   }
-
-  const stats = [
-    { title: 'CAGR', value: currentData?.cagr !== null ? `${currentData?.cagr}%` : 'N/A' },
-    { title: 'Final Value', value: currentData?.finalValue !== undefined ? currentData?.finalValue.toFixed(2) : 'N/A' },
-  ]
 
   return (
     <div className="p-8 space-y-6">
@@ -112,19 +102,7 @@ export const BackTester = () => {
         </FieldCard>
       </div>
 
-      <div className="grid grid-cols-4">
-        {stats.map((stat) => (
-          <FieldCard key={stat.title}>
-            <StatCard title={stat.title} value={stat.value} className="w-full" />
-          </FieldCard>
-        ))}
-      </div>
-
-      {seriesData?.length ? (
-        <FieldCard>
-          <GrowthChart data={visibleData} />
-        </FieldCard>
-      ) : null}
+      <BacktestResult seriesData={seriesData} runId={runId} />
     </div>
   )
 }
