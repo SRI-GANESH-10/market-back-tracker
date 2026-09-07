@@ -1,21 +1,36 @@
-import { useMemo } from 'react'
 import { useAnimatedSeries } from '@/hooks/useAnimatedSeries'
-import type { SeriesData } from '@/hooks/useMarketCagr'
+import type { ReturnMetric, SeriesData } from '@/lib/backtest'
 import { FieldCard } from '@/components/shared/FieldCard'
 import { StatCard } from '@/components/shared/StatCard'
 import { GrowthChart } from '@/components/shared/GrowthChart'
+import { inr, pct } from '@/lib/utils'
 
 type BacktestResultProps = {
-  seriesData: SeriesData[] | undefined
+  seriesData: SeriesData[]
+  returnMetric: ReturnMetric | undefined
   runId: number
 }
 
-export const BacktestResult = ({ seriesData, runId }: BacktestResultProps) => {
+export const BacktestResult = ({ seriesData, returnMetric, runId }: BacktestResultProps) => {
   const { currentData, visibleData } = useAnimatedSeries(seriesData, runId)
 
+  // CAGR/XIRR describe the whole run, so they only exist on the final row. Hold
+  // them back until the animation gets there rather than spoiling the result.
+  const settled = seriesData.length > 0 && visibleData.length >= seriesData.length
+
   const stats = [
-    { title: 'CAGR', value: currentData?.cagr != null ? `${currentData.cagr}%` : 'N/A' },
-    { title: 'Final Value', value: currentData?.finalValue != null ? currentData.finalValue.toFixed(2) : 'N/A' },
+    { title: 'Invested', value: currentData ? inr(currentData.invested) : '—' },
+    { title: 'Current Value', value: currentData ? inr(currentData.value) : '—' },
+    {
+      title: 'Return',
+      value: currentData ? pct(currentData.returnPct) : '—',
+      description: 'absolute',
+    },
+    {
+      title: returnMetric?.label ?? 'CAGR',
+      value: settled ? (returnMetric?.value == null ? 'N/A' : pct(returnMetric.value)) : '—',
+      description: settled ? 'annualised' : 'on completion',
+    },
   ]
 
   return (
@@ -23,12 +38,17 @@ export const BacktestResult = ({ seriesData, runId }: BacktestResultProps) => {
       <div className="grid grid-cols-4">
         {stats.map((stat) => (
           <FieldCard key={stat.title}>
-            <StatCard title={stat.title} value={stat.value} className="w-full" />
+            <StatCard
+              title={stat.title}
+              value={stat.value}
+              description={stat.description}
+              className="w-full"
+            />
           </FieldCard>
         ))}
       </div>
 
-      {seriesData?.length ? (
+      {seriesData.length ? (
         <FieldCard>
           <GrowthChart data={visibleData} />
         </FieldCard>

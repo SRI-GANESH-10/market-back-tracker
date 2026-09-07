@@ -6,22 +6,14 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import type { SeriesData } from '@/hooks/useMarketCagr'
+import type { SeriesData } from '@/lib/backtest'
+import { compactInr, inr } from '@/lib/utils'
 
 const chartConfig = {
-  finalValue: { label: 'Portfolio Value', color: 'var(--chart-1)' },
+  value: { label: 'Portfolio Value', color: 'var(--chart-1)' },
+  // a baseline, not a second series -- muted so the value line stays the subject
+  invested: { label: 'Invested', color: 'var(--muted-foreground)' },
 } satisfies ChartConfig
-
-const inr = (n: number) =>
-  n.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
-
-const compactInr = (n: number) =>
-  n.toLocaleString('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  })
 
 type GrowthChartProps = {
   data: SeriesData[]
@@ -49,11 +41,13 @@ export const GrowthChart = ({ data }: GrowthChartProps) => (
       <ChartTooltip
         content={
           <ChartTooltipContent
-            className="w-[200px]"
+            className="w-[220px]"
             labelFormatter={(v) => format(parseISO(String(v)), 'dd MMM yyyy')}
-            formatter={(v) => (
+            formatter={(v, name) => (
               <div className="flex flex-1 items-center justify-between gap-3">
-                <span className="text-muted-foreground">Value</span>
+                <span className="text-muted-foreground">
+                  {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
+                </span>
                 <span className="font-mono font-medium text-foreground tabular-nums">
                   {inr(Number(v))}
                 </span>
@@ -63,9 +57,18 @@ export const GrowthChart = ({ data }: GrowthChartProps) => (
         }
       />
       <Line
-        dataKey="finalValue"
+        dataKey="invested"
+        type="stepAfter"
+        stroke="var(--color-invested)"
+        strokeWidth={1.5}
+        strokeDasharray="4 4"
+        dot={false}
+        isAnimationActive={false}
+      />
+      <Line
+        dataKey="value"
         type="monotone"
-        stroke="var(--color-finalValue)"
+        stroke="var(--color-value)"
         strokeWidth={2}
         dot={false}
         isAnimationActive={false}

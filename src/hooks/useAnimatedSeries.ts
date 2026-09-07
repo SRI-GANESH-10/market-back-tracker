@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SeriesData } from "./useMarketCagr";
+import type { SeriesData } from "@/lib/backtest";
 
 export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, runId: number) => {
     const [currIndex, setCurrIndex] = useState(0);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
-
-export type MarketRow = { date: string; close: number }
+import type { MarketRow } from "@/lib/backtest"
 
 export const useSelectMarketType = (market: string | null) => {
     const [data, setData] = useState<MarketRow[]>([])

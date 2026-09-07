@@ -1,21 +1,24 @@
 import { useState } from 'react'
 import { NavBar } from '@/components/shared/NavBar'
 import { ComboBox } from '@/components/shared/ComboBox'
-import { INVESTEMENT_TYPES, MARKETS } from '@/constants/markets'
+import { INVESTEMENT_TYPES, MARKETS, SIP_FREQUENCIES } from '@/constants/markets'
 import { TabSelect } from '@/components/shared/TabSelect'
 import { InputLabel } from '@/components/shared/Inputlabel'
 import { DateLabel } from '@/components/shared/DateLabel'
-import { useMarketCagr } from '@/hooks/useMarketCagr'
+import { useBacktest } from '@/hooks/useBacktest'
 import { Button } from '@/components/ui/button'
 import { FieldCard } from '@/components/shared/FieldCard'
 import { BacktestResult } from '@/components/shared/BacktestResult'
+import type { InvestmentMode } from '@/lib/backtest'
 
 type InvestmentType = 'lumpsum' | 'sip'
+type SipFrequency = (typeof SIP_FREQUENCIES)[number]['value']
 
 type Submission = {
   market: string
   date: Date
   amount: number
+  mode: InvestmentMode
 }
 
 export const BackTester = () => {
@@ -23,14 +26,15 @@ export const BackTester = () => {
   const [investmentType, setInvestmentType] = useState<InvestmentType>('lumpsum')
   const [amount, setAmount] = useState<number | string>(0)
   const [date, setDate] = useState<Date | undefined>(undefined)
-  const [sipDays, setSipDays] = useState<number | string>(30)
+  const [sipFrequency, setSipFrequency] = useState<SipFrequency>('monthly')
   const [submitted, setSubmitted] = useState<Submission | null>(null)
   const [runId, setRunId] = useState(0)
 
-  const { seriesData } = useMarketCagr(
+  const { seriesData, returnMetric } = useBacktest(
     submitted?.market ?? null,
     submitted?.date,
-    submitted?.amount ?? 0
+    submitted?.amount ?? 0,
+    submitted?.mode ?? 'lumpsum'
   )
 
   const isSip = investmentType === 'sip'
@@ -38,7 +42,12 @@ export const BackTester = () => {
 
   const handleBacktest = () => {
     if (!canRun) return
-    setSubmitted({ market: market!, date: date!, amount: Number(amount) })
+    setSubmitted({
+      market: market!,
+      date: date!,
+      amount: Number(amount),
+      mode: isSip ? sipFrequency : 'lumpsum',
+    })
     setRunId((n) => n + 1)
   }
 
@@ -69,7 +78,7 @@ export const BackTester = () => {
 
         <FieldCard>
           <InputLabel
-            label="Amount"
+            label={isSip ? 'Amount per instalment' : 'Amount'}
             placeholder="Enter amount"
             value={amount}
             onChange={setAmount}
@@ -81,7 +90,7 @@ export const BackTester = () => {
 
         <FieldCard>
           <DateLabel
-            label="Select Date"
+            label={isSip ? 'First instalment' : 'Select Date'}
             date={date}
             onChange={setDate}
             className="w-64"
@@ -89,20 +98,18 @@ export const BackTester = () => {
         </FieldCard>
 
         <FieldCard>
-          <InputLabel
-            label="SIP Days"
-            placeholder="Enter SIP Days"
-            value={sipDays}
-            onChange={setSipDays}
-            className="w-64"
-            type="number"
-            nonNegative
+          <TabSelect
+            label="Frequency"
+            options={SIP_FREQUENCIES}
+            value={sipFrequency}
+            onChange={(value) => setSipFrequency(value as SipFrequency)}
+            className="border-primary"
             disabled={!isSip}
           />
         </FieldCard>
       </div>
 
-      <BacktestResult seriesData={seriesData} runId={runId} />
+      <BacktestResult seriesData={seriesData} returnMetric={returnMetric} runId={runId} />
     </div>
   )
 }
