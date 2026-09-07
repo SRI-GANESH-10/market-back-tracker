@@ -1,4 +1,4 @@
-import { useActionState, useState } from 'react'
+import { useState } from 'react'
 import { NavBar } from '@/components/shared/NavBar'
 import { ComboBox } from '@/components/shared/ComboBox'
 import { INVESTEMENT_TYPES, MARKETS } from '@/constants/markets'
@@ -24,7 +24,6 @@ const FieldCard = ({ children }: { children: React.ReactNode }) => (
 )
 
 export const BackTester = () => {
-  // Inputs
   const [market, setMarket] = useState<string | null>(null)
   const [investmentType, setInvestmentType] = useState<InvestmentType>('lumpsum')
   const [amount, setAmount] = useState<number | string>(0)
@@ -32,13 +31,13 @@ export const BackTester = () => {
   const [sipDays, setSipDays] = useState<number | string>(30)
   const [submitted, setSubmitted] = useState<Submission | null>(null)
 
-  const { seriesData,startRow, endRow, years, finalValue, cagr } = useMarketCagr(
+  const { seriesData } = useMarketCagr(
     submitted?.market ?? null,
     submitted?.date,
     submitted?.amount ?? 0
   )
 
-  const { currentData, visibleData, isPlaying} = useAnimatedSeries(seriesData);
+  const { currentData, visibleData } = useAnimatedSeries(seriesData)
 
   const isSip = investmentType === 'sip'
   const canRun = !!market && !!date && Number(amount) > 0
@@ -48,13 +47,9 @@ export const BackTester = () => {
     setSubmitted({ market: market!, date: date!, amount: Number(amount) })
   }
 
-  const profit = finalValue !== undefined ? finalValue - Number(submitted?.amount ?? 0) : undefined
-
   const stats = [
     { title: 'CAGR', value: currentData?.cagr !== null ? `${currentData?.cagr}%` : 'N/A' },
     { title: 'Final Value', value: currentData?.finalValue !== undefined ? currentData?.finalValue.toFixed(2) : 'N/A' },
-    // { title: 'Profit', value: profit !== undefined ? profit.toFixed(2) : 'N/A' },
-    // { title: 'Years', value: currentData?.years ?? 'N/A' },
   ]
 
   return (
