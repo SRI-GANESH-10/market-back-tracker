@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useAnimatedSeries } from '@/hooks/useAnimatedSeries'
 import type { SeriesData } from '@/hooks/useMarketCagr'
 import { FieldCard } from '@/components/shared/FieldCard'

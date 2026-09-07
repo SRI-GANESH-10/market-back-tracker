@@ -13,7 +13,7 @@ export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, runId: n
         const id = setInterval(() => {
             setCurrIndex(++i)
             if (i >= len) clearInterval(id)
-        }, 100)
+        }, 1)
 
         return () => clearInterval(id)
     }, [seriesData, runId])

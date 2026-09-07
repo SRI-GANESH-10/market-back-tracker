@@ -31,6 +31,8 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.627 0.194 149.21);
+  /* chart series — validated: L in band, C >= 0.1, >= 3:1 on the card surface */
+  --chart-1: #00a63e;
 }
 
 .dark {
@@ -56,6 +58,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.723 0.192 149.58);
+  --chart-1: #12ad5b;
 }
 
 @theme inline {
