@@ -24,14 +24,28 @@ export const useAnimatedSeries = (seriesData: SeriesData[] | undefined, speed = 
     const visibleData = seriesData?.slice(0, currIndex) ?? []
     const currentData = visibleData.at(-1) ?? null
 
-    const toggle = () =>{
-        setIsPlaying(prev => !prev);
+    const toggle = () => {
+        if (!isPlaying && currentIndexRed.current >= len) {
+            currentIndexRed.current = 0
+            setCurrIndex(0)
+        }
+        setIsPlaying(prev => !prev)
     }
+
+    const skipForward = () => {
+        if (currentIndexRed.current < len) {
+            currentIndexRed.current = len
+            setCurrIndex(len)
+            setIsPlaying(false)
+        }
+    }
+
 
     return {
         currentData,
         visibleData,
         isPlaying,
-        toggle
+        toggle,
+        skipForward
     }
 }

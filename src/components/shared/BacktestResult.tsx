@@ -6,7 +6,7 @@ import { GrowthChart } from '@/components/shared/GrowthChart'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { inr, pct } from '@/lib/utils'
-import { Pause, Play } from 'lucide-react'
+import { Pause, Play, SkipForward } from 'lucide-react'
 
 type BacktestResultProps = {
   seriesData: SeriesData[]
@@ -21,7 +21,7 @@ export const BacktestResult = ({
   speed,
   onSpeedChange,
 }: BacktestResultProps) => {
-  const { currentData, visibleData, isPlaying, toggle } = useAnimatedSeries(seriesData, speed)
+  const { currentData, visibleData, isPlaying, toggle, skipForward } = useAnimatedSeries(seriesData, speed)
 
   // CAGR/XIRR describe the whole run, so they only exist on the final row. Hold
   // them back until the animation gets there rather than spoiling the result.
@@ -74,11 +74,14 @@ export const BacktestResult = ({
                 value={speed}
                 onValueChange={(value) => onSpeedChange(Math.round(Number(value) * 10) / 10)}
               />
-              {isPlaying ? (
-                <Pause onClick={toggle}></Pause>
-              ) : (
-                <Play onClick={toggle}></Play>
-              )}
+              <div className="flex items-center gap-4">
+                {isPlaying ? (
+                  <Pause onClick={toggle}></Pause>
+                ) : (
+                  <Play onClick={toggle}></Play>
+                )}
+                <SkipForward onClick={skipForward}></SkipForward>
+              </div>
             </div>
           </div>
           <GrowthChart data={visibleData} />
