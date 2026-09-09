@@ -1,4 +1,4 @@
-import { useAnimatedSeries, PAINT_MS } from '@/hooks/useAnimatedSeries'
+import { useAnimatedSeries } from '@/hooks/useAnimatedSeries'
 import type { ReturnMetric, SeriesData } from '@/lib/backtest'
 import { FieldCard } from '@/components/shared/FieldCard'
 import { StatCard } from '@/components/shared/StatCard'
@@ -6,11 +6,11 @@ import { GrowthChart } from '@/components/shared/GrowthChart'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { inr, pct } from '@/lib/utils'
+import { Pause, Play } from 'lucide-react'
 
 type BacktestResultProps = {
   seriesData: SeriesData[]
   returnMetric: ReturnMetric | undefined
-  runId: number
   speed: number
   onSpeedChange: (speed: number) => void
 }
@@ -18,11 +18,10 @@ type BacktestResultProps = {
 export const BacktestResult = ({
   seriesData,
   returnMetric,
-  runId,
   speed,
   onSpeedChange,
 }: BacktestResultProps) => {
-  const { currentData, visibleData } = useAnimatedSeries(seriesData, runId, speed)
+  const { currentData, visibleData, isPlaying, toggle } = useAnimatedSeries(seriesData, speed)
 
   // CAGR/XIRR describe the whole run, so they only exist on the final row. Hold
   // them back until the animation gets there rather than spoiling the result.
@@ -75,6 +74,11 @@ export const BacktestResult = ({
                 value={speed}
                 onValueChange={(value) => onSpeedChange(Math.round(Number(value) * 10) / 10)}
               />
+              {isPlaying ? (
+                <Pause onClick={toggle}></Pause>
+              ) : (
+                <Play onClick={toggle}></Play>
+              )}
             </div>
           </div>
           <GrowthChart data={visibleData} />

@@ -113,9 +113,9 @@ export const BackTester = () => {
       </div>
 
       <BacktestResult
+        key={runId}
         seriesData={seriesData}
         returnMetric={returnMetric}
-        runId={runId}
         speed={speed}
         onSpeedChange={setSpeed}
       />
