@@ -20,7 +20,7 @@ type GrowthChartProps = {
 }
 
 export const GrowthChart = ({ data }: GrowthChartProps) => (
-  <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
+  <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full sm:h-[300px]">
     <LineChart accessibilityLayer data={data} margin={{ left: 12, right: 12 }}>
       <CartesianGrid vertical={false} />
       <XAxis
@@ -35,13 +35,13 @@ export const GrowthChart = ({ data }: GrowthChartProps) => (
         tickLine={false}
         axisLine={false}
         tickMargin={8}
-        width={68}
+        width={52}
         tickFormatter={(v) => compactInr(Number(v))}
       />
       <ChartTooltip
         content={
           <ChartTooltipContent
-            className="w-[220px]"
+            className="w-[180px] sm:w-[220px]"
             labelFormatter={(v) => format(parseISO(String(v)), 'dd MMM yyyy')}
             formatter={(v, name) => (
               <div className="flex flex-1 items-center justify-between gap-3">

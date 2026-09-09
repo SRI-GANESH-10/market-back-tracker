@@ -45,7 +45,7 @@ export const BacktestResult = ({
 
   return (
     <>
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <FieldCard key={stat.title}>
             <StatCard
@@ -60,8 +60,8 @@ export const BacktestResult = ({
 
       {seriesData.length ? (
         <FieldCard>
-          <div className="mb-6 flex items-end justify-between gap-8">
-            <div className="flex w-64 flex-col gap-2">
+          <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+            <div className="flex w-full flex-col gap-2 sm:w-64">
               <div className="flex items-baseline justify-between">
                 <Label className="ml-1">Speed</Label>
                 <span className="font-mono text-sm tabular-nums">

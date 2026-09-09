@@ -55,20 +55,20 @@ export const BackTester = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 space-y-6 sm:p-8">
       <NavBar/>
       <ComboBox
         options={MARKETS}
         value={market}
         onChange={setMarket}
         placeholder="Select a market"
-        className="w-64"
+        className="w-full sm:w-64"
       />
       <Button disabled={!canRun} onClick={handleBacktest}>
         Backtest
       </Button>
 
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <FieldCard>
           <TabSelect
             label="Mode"
@@ -85,7 +85,7 @@ export const BackTester = () => {
             placeholder="Enter amount"
             value={amount}
             onChange={setAmount}
-            className="w-64"
+            className="w-full sm:w-64"
             type="number"
             nonNegative
           />
@@ -96,7 +96,7 @@ export const BackTester = () => {
             label={isSip ? 'First instalment' : 'Select Date'}
             date={date}
             onChange={setDate}
-            className="w-64"
+            className="w-full sm:w-64"
           />
         </FieldCard>
 

@@ -15,7 +15,7 @@ type InputLabelProps = {
 
 export const InputLabel = ({ value, onChange, label, type = "text", nonNegative = false, placeholder, className, disabled=false }: InputLabelProps) => {
     return (
-        <div className='flex gap-2 flex-col w-fit'>
+        <div className='flex gap-2 flex-col w-full sm:w-fit'>
             <Label>{label}</Label>
             <Input
                 type={type}

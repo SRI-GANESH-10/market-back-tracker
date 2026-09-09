@@ -22,7 +22,7 @@ export const DateLabel = ({ date, onChange, className, label = "Select Date", st
     const [open, setOpen] = useState(false)
 
     return (
-        <div className="flex gap-2 flex-col w-fit">
+        <div className="flex gap-2 flex-col w-full sm:w-fit">
             <Label>{label}</Label>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger
