@@ -17,3 +17,7 @@ export const compactInr = (n: number) =>
   })
 
 export const pct = (n: number) => `${(n * 100).toFixed(2)}%`
+
+export const signedInr = (n: number) => (n >= 0 ? '+' : '−') + inr(Math.abs(n))
+
+export const signedPct = (n: number) => (n >= 0 ? '+' : '−') + pct(Math.abs(n))

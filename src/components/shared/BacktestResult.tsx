@@ -1,11 +1,10 @@
 import { useAnimatedSeries } from '@/hooks/useAnimatedSeries'
 import type { ReturnMetric, SeriesData } from '@/lib/backtest'
 import { FieldCard } from '@/components/shared/FieldCard'
-import { StatCard } from '@/components/shared/StatCard'
+import { PortfolioHero } from '@/components/shared/PortfolioHero'
 import { GrowthChart } from '@/components/shared/GrowthChart'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
-import { inr, pct } from '@/lib/utils'
 import { Pause, Play, SkipForward } from 'lucide-react'
 
 type BacktestResultProps = {
@@ -13,6 +12,13 @@ type BacktestResultProps = {
   returnMetric: ReturnMetric | undefined
   speed: number
   onSpeedChange: (speed: number) => void
+  /**
+   * The input controls. They render between the hero and the chart, and they
+   * live here as children rather than in the page because the hero and the
+   * chart both read this component's replay state -- and it is keyed on runId,
+   * so a new run remounts the whole block.
+   */
+  children?: React.ReactNode
 }
 
 export const BacktestResult = ({
@@ -20,6 +26,7 @@ export const BacktestResult = ({
   returnMetric,
   speed,
   onSpeedChange,
+  children,
 }: BacktestResultProps) => {
   const { currentData, visibleData, isPlaying, toggle, skipForward } = useAnimatedSeries(seriesData, speed)
 
@@ -27,35 +34,11 @@ export const BacktestResult = ({
   // them back until the animation gets there rather than spoiling the result.
   const settled = seriesData.length > 0 && visibleData.length >= seriesData.length
 
-  const stats = [
-    { title: 'Invested', value: currentData ? inr(currentData.invested) : '—' },
-    { title: 'Current Value', value: currentData ? inr(currentData.value) : '—' },
-    {
-      title: 'Return',
-      value: currentData ? pct(currentData.returnPct) : '—',
-      description: 'absolute',
-    },
-    {
-      title: returnMetric?.label ?? 'CAGR',
-      value: settled ? (returnMetric?.value == null ? 'N/A' : pct(returnMetric.value)) : '—',
-      description: settled ? 'annualised' : 'on completion',
-    },
-  ]
-
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <FieldCard key={stat.title}>
-            <StatCard
-              title={stat.title}
-              value={stat.value}
-              description={stat.description}
-              className="w-full"
-            />
-          </FieldCard>
-        ))}
-      </div>
+      <PortfolioHero current={currentData} returnMetric={returnMetric} settled={settled} />
+
+      {children}
 
       {seriesData.length ? (
         <FieldCard>
