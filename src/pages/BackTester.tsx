@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavBar } from '@/components/shared/NavBar'
 import { ComboBox } from '@/components/shared/ComboBox'
 import { INVESTEMENT_TYPES, MARKETS, SIP_FREQUENCIES } from '@/constants/markets'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { FieldCard } from '@/components/shared/FieldCard'
 import { BacktestResult } from '@/components/shared/BacktestResult'
 import type { InvestmentMode } from '@/lib/backtest'
+import { readParams, toSearch } from '@/lib/shareUrl'
 
 type InvestmentType = 'lumpsum' | 'sip'
 type SipFrequency = (typeof SIP_FREQUENCIES)[number]['value']
@@ -20,14 +21,19 @@ type Submission = {
   amount: number
   mode: InvestmentMode
 }
+const initial = readParams(window.location.search)
 
 export const BackTester = () => {
-  const [market, setMarket] = useState<string | null>(null)
-  const [investmentType, setInvestmentType] = useState<InvestmentType>('lumpsum')
-  const [amount, setAmount] = useState<number | string>(0)
-  const [date, setDate] = useState<Date | undefined>(undefined)
-  const [sipFrequency, setSipFrequency] = useState<SipFrequency>('monthly')
-  const [submitted, setSubmitted] = useState<Submission | null>(null)
+  const [market, setMarket] = useState<string | null>(initial.market)
+  const [investmentType, setInvestmentType] = useState<InvestmentType>(
+    initial.mode === 'lumpsum' ? 'lumpsum' : 'sip'
+  )
+  const [amount, setAmount] = useState<number | string>(initial.amount)
+  const [date, setDate] = useState<Date | undefined>(initial.date)
+  const [sipFrequency, setSipFrequency] = useState<SipFrequency>(
+    initial.mode === 'lumpsum' ? 'monthly' : initial.mode
+  )
+  const [submitted, setSubmitted] = useState<Submission | null>(initial)
   const [runId, setRunId] = useState(0)
   // playback only -- deliberately not part of Submission, so changing it does
   // not re-run the backtest or rewind the replay
@@ -53,10 +59,13 @@ export const BackTester = () => {
     })
     setRunId((n) => n + 1)
   }
+  useEffect(() => {
+    if (submitted) window.history.replaceState(null, '', toSearch(submitted))
+  }, [submitted])
 
   return (
     <div className="p-4 space-y-6 sm:p-8">
-      <NavBar/>
+      <NavBar shareUrl={submitted ? window.location.href : undefined} />
       <ComboBox
         options={MARKETS}
         value={market}
