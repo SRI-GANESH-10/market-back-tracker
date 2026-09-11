@@ -5,7 +5,8 @@ import { PortfolioHero } from '@/components/shared/PortfolioHero'
 import { GrowthChart } from '@/components/shared/GrowthChart'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
-import { Pause, Play, SkipForward } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react'
 
 type BacktestResultProps = {
   seriesData: SeriesData[]
@@ -42,14 +43,29 @@ export const BacktestResult = ({
 
       {seriesData.length ? (
         <FieldCard>
-          <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
-            <div className="flex w-full flex-col gap-2 sm:w-64">
-              <div className="flex items-baseline justify-between">
-                <Label className="ml-1">Speed</Label>
-                <span className="font-mono text-sm tabular-nums">
-                  {speed.toFixed(1)}x
-                </span>
-              </div>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={toggle}
+                aria-label={settled ? 'Replay' : isPlaying ? 'Pause' : 'Play'}
+              >
+                {settled ? <RotateCcw /> : isPlaying ? <Pause /> : <Play />}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={skipForward}
+                disabled={settled}
+                aria-label="Skip to end"
+              >
+                <SkipForward />
+              </Button>
+            </div>
+
+            <div className="flex w-full items-center gap-3 sm:w-72">
+              <Label className="text-muted-foreground">Speed</Label>
               <Slider
                 min={1}
                 max={4}
@@ -57,14 +73,9 @@ export const BacktestResult = ({
                 value={speed}
                 onValueChange={(value) => onSpeedChange(Math.round(Number(value) * 10) / 10)}
               />
-              <div className="flex items-center gap-4">
-                {isPlaying ? (
-                  <Pause onClick={toggle}></Pause>
-                ) : (
-                  <Play onClick={toggle}></Play>
-                )}
-                <SkipForward onClick={skipForward}></SkipForward>
-              </div>
+              <span className="w-10 shrink-0 text-right font-mono text-sm tabular-nums">
+                {speed.toFixed(1)}x
+              </span>
             </div>
           </div>
           <GrowthChart data={visibleData} />
