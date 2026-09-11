@@ -22,14 +22,14 @@ export const DateLabel = ({ date, onChange, className, label = "Select Date", st
     const [open, setOpen] = useState(false)
 
     return (
-        <div className="flex gap-2 flex-col w-full sm:w-fit">
+        <div className="flex gap-2 flex-col w-full">
             <Label>{label}</Label>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger
                     render={
                         <Button
                             variant="outline"
-                            className={cn("w-56 justify-start font-normal", !date && "text-muted-foreground", className)}
+                            className={cn("w-full justify-start font-normal", !date && "text-muted-foreground", className)}
                         >
                             <CalendarIcon />
                             {date ? format(date, "dd MMM yyyy") : "Pick a date"}

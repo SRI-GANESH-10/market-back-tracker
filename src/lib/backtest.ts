@@ -1,4 +1,5 @@
 import xirr from 'xirr'
+import { instalmentOn } from '@/lib/utils'
 import { addMonths, addWeeks, parseISO } from 'date-fns'
 
 export type MarketRow = { date: string; close: number }
@@ -15,44 +16,25 @@ export type SeriesData = {
   returnPct: number
 }
 
-/** A lumpsum has one cashflow, so a plain annualised growth rate is the right
- * number. A SIP's rupees each sat invested for a different length of time, so it
- * needs XIRR. Never the other way round. */
+export type Buy = { date: string; amount: number }
+
 export type ReturnMetric = {
   label: 'CAGR' | 'XIRR'
-  /** Annualised rate as a fraction: 0.1234 is 12.34% a year. null if unsolvable. */
   value: number | null
 }
 
-/** Actual/365, the day count `xirr` uses internally (DAYS_IN_YEAR in its
- * source). CAGR has to share it, or the same trade reports two different rates
- * in the two modes. */
 const MS_PER_YEAR = 1000 * 60 * 60 * 24 * 365
 
 const FAR_FUTURE = new Date(8.64e15)
 
 const cagr = (start: number, end: number, years: number) => (end / start) ** (1 / years) - 1
 
-/**
- * Advances the SIP schedule. Always called with the ORIGINAL start date and an
- * instalment count, never with the previous due date -- addMonths(Jan 31, 1)
- * clamps to Feb 28, and stepping on from there would drift the anchor to the
- * 28th forever. addMonths(Jan 31, 2) is Mar 31.
- *
- * lumpsum returns a date that never arrives, so `due` never re-arms after the
- * first buy and the same loop covers all three modes with no branch.
- */
 const STEP: Record<InvestmentMode, (start: Date, n: number) => Date> = {
   lumpsum: () => FAR_FUTURE,
   weekly: addWeeks,
   monthly: addMonths,
 }
 
-/**
- * xirr throws on degenerate cashflows (all on one day, all one sign) and on
- * non-convergence, rather than returning a plausible wrong number. null here
- * means "no annualised rate exists for these cashflows".
- */
 const safeXirr = (transactions: { amount: number; when: Date }[]) => {
   try {
     return xirr(transactions)
@@ -66,25 +48,26 @@ export const runBacktest = ({
   startDate,
   amount,
   mode,
+  stepUpPer,
 }: {
   rows: MarketRow[]
   startDate: Date | undefined
   amount: number
   mode: InvestmentMode
+  stepUpPer: number
 }) => {
   const firstDate = rows[0]?.date
 
-  // parseISO, not new Date: a date-only string parses as UTC midnight while the
-  // picker hands over local midnight, which shifts the buy by a day west of UTC.
+
   const startIdx = startDate ? rows.findIndex((row) => parseISO(row.date) >= startDate) : -1
 
   if (startIdx === -1 || amount <= 0) {
-    return { seriesData: [] as SeriesData[], buyDates: [] as string[], firstDate }
+    return { seriesData: [] as SeriesData[], buys: [] as Buy[], firstDate }
   }
 
   const step = STEP[mode]
   const seriesData: SeriesData[] = []
-  const buyDates: string[] = []
+  const buys: Buy[] = []
 
   let units = 0
   let invested = 0
@@ -95,14 +78,12 @@ export const runBacktest = ({
     const rowDate = parseISO(row.date)
 
     if (rowDate >= due) {
-      units += amount / row.close
-      invested += amount
-      buyDates.push(row.date)
+      const buy = instalmentOn(amount, stepUpPer, startDate!, rowDate)
+      units += buy / row.close
+      invested += buy
+      buys.push({ date: row.date, amount: buy })
 
       due = step(startDate!, ++instalments)
-      // A closure longer than one interval skips the missed instalment rather
-      // than buying twice on the reopen day. Fill dates never feed back into the
-      // schedule, so 1st / 8th / (15th closed -> 16th) still steps on to the 22nd.
       while (due <= rowDate) due = step(startDate!, ++instalments)
     }
 
@@ -129,15 +110,14 @@ export const runBacktest = ({
       : {
           label: 'XIRR',
           value: safeXirr([
-            // money out is negative; the closing valuation is a notional inflow
-            ...buyDates.map((date) => ({ amount: -amount, when: parseISO(date) })),
+            ...buys.map((b) => ({ amount: -b.amount, when: parseISO(b.date) })),
             { amount: last.value, when: parseISO(last.date) },
           ]),
         }
 
   return {
     seriesData,
-    buyDates,
+    buys,
     startRow,
     endRow,
     firstDate,

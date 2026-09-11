@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
 import { NavBar } from '@/components/shared/NavBar'
 import { ComboBox } from '@/components/shared/ComboBox'
 import { INVESTEMENT_TYPES, MARKETS, SIP_FREQUENCIES } from '@/constants/markets'
-import { TabSelect } from '@/components/shared/TabSelect'
+import { ChipSelect } from '@/components/shared/ChipSelect'
 import { InputLabel } from '@/components/shared/Inputlabel'
+import { TabSelect } from '@/components/shared/TabSelect'
 import { DateLabel } from '@/components/shared/DateLabel'
 import { useBacktest } from '@/hooks/useBacktest'
 import { Button } from '@/components/ui/button'
@@ -13,6 +15,9 @@ import { BacktestResult } from '@/components/shared/BacktestResult'
 import type { InvestmentMode } from '@/lib/backtest'
 import { readParams, toSearch } from '@/lib/shareUrl'
 
+import { cn } from '@/lib/utils'
+import { DEFAULT_INVESTEMENT_CHIPS } from '@/constants/common'
+
 type InvestmentType = 'lumpsum' | 'sip'
 type SipFrequency = (typeof SIP_FREQUENCIES)[number]['value']
 
@@ -21,6 +26,7 @@ type Submission = {
   date: Date
   amount: number
   mode: InvestmentMode
+  stepUpPer: number
 }
 
 const initial = window.location.search ? readParams(window.location.search) : null
@@ -31,21 +37,22 @@ export const BackTester = () => {
     initial?.mode === 'lumpsum' ? 'lumpsum' : 'sip'
   )
   const [amount, setAmount] = useState<number | string>(initial?.amount ?? '')
+  const [stepUpPer, setStepUpPer] = useState<number | string>(initial?.stepUpPer || '')
   const [date, setDate] = useState<Date | undefined>(initial?.date)
   const [sipFrequency, setSipFrequency] = useState<SipFrequency>(
     !initial || initial.mode === 'lumpsum' ? 'monthly' : initial.mode
   )
   const [submitted, setSubmitted] = useState<Submission | null>(initial)
   const [runId, setRunId] = useState(0)
-  // playback only -- deliberately not part of Submission, so changing it does
-  // not re-run the backtest or rewind the replay
+
   const [speed, setSpeed] = useState(1)
 
   const { seriesData, returnMetric } = useBacktest(
     submitted?.market ?? null,
     submitted?.date,
     submitted?.amount ?? 0,
-    submitted?.mode ?? 'lumpsum'
+    submitted?.mode ?? 'lumpsum',
+    submitted?.stepUpPer ?? 0
   )
 
   const isSip = investmentType === 'sip'
@@ -58,6 +65,7 @@ export const BackTester = () => {
       date: date!,
       amount: Number(amount),
       mode: isSip ? sipFrequency : 'lumpsum',
+      stepUpPer: isSip ? Number(stepUpPer) || 0 : 0,
     })
     setRunId((n) => n + 1)
   }
@@ -68,6 +76,7 @@ export const BackTester = () => {
     setDate(undefined)
     setInvestmentType('sip')
     setSipFrequency('monthly')
+    setStepUpPer('')
     setSubmitted(null)
     setRunId((n) => n + 1)
   }
@@ -86,6 +95,13 @@ export const BackTester = () => {
           placeholder="Select a market"
           className="w-40 sm:w-56"
         />
+        <Button size="sm" disabled={!canRun} onClick={handleBacktest} className={'rounded-none'}>
+          Backtest
+        </Button>
+        <Button size="sm" variant="outline" onClick={handleReset} className={'rounded-none'}>
+          <RotateCcw />
+          Reset
+        </Button>
       </NavBar>
       <BacktestResult
         key={runId}
@@ -94,57 +110,79 @@ export const BackTester = () => {
         speed={speed}
         onSpeedChange={setSpeed}
       >
-        <div className="flex items-center gap-2">
-          <Button disabled={!canRun} onClick={handleBacktest}>
-            Backtest
-          </Button>
-          <Button variant="outline" onClick={handleReset}>
-            <RotateCcw />
-            Reset
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <FieldCard>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <FieldCard className="flex flex-col gap-4">
             <TabSelect
               label="Mode"
               options={INVESTEMENT_TYPES}
               value={investmentType}
               onChange={(value) => setInvestmentType(value as InvestmentType)}
-              className="border-primary"
+              className="border-primary/15 w-full"
+            />
+            <ChipSelect
+              label="Every"
+              options={SIP_FREQUENCIES}
+              value={sipFrequency}
+              onChange={(value) => setSipFrequency(value as SipFrequency)}
+              disabled={!isSip}
             />
           </FieldCard>
 
-          <FieldCard>
+          <FieldCard className="flex flex-col gap-4">
             <InputLabel
               label={isSip ? 'Amount per instalment' : 'Amount'}
               placeholder="Enter amount"
               value={amount}
               onChange={setAmount}
-              className="w-full sm:w-64"
+              className="w-full"
               type="number"
               nonNegative
             />
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                {DEFAULT_INVESTEMENT_CHIPS.map((chip) => (
+                  <Button
+                    key={chip.value}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full text-muted-foreground"
+                    onClick={() => setAmount(chip.value)}
+                  >
+                    {chip.label}
+                  </Button>
+                ))}
+              </div>
+
+              <InputLabel
+                label="Step-up"
+                placeholder="%/yr"
+                value={stepUpPer}
+                onChange={setStepUpPer}
+                type="number"
+                nonNegative
+                disabled={!isSip}
+                className="w-24 rounded-full text-right"
+                inputClassName={cn('flex-row items-center w-auto', !isSip && 'opacity-50')}
+                max={100}
+              />
+            </div>
           </FieldCard>
 
-          <FieldCard>
+          <FieldCard className="flex flex-col gap-4">
             <DateLabel
               label={isSip ? 'First instalment' : 'Select Date'}
               date={date}
               onChange={setDate}
-              className="w-full sm:w-64"
+              className="w-full rounded-none"
             />
-          </FieldCard>
-
-          <FieldCard>
-            <TabSelect
-              label="Frequency"
-              options={SIP_FREQUENCIES}
-              value={sipFrequency}
-              onChange={(value) => setSipFrequency(value as SipFrequency)}
-              className="border-primary"
-              disabled={!isSip}
-            />
+            {date && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {isSip
+                  ? `${SIP_FREQUENCIES.find((f) => f.value === sipFrequency)?.label} from ${format(date, 'dd MMM yyyy')}`
+                  : `One purchase on ${format(date, 'dd MMM yyyy')}`}
+              </p>
+            )}
           </FieldCard>
         </div>
       </BacktestResult>

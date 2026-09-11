@@ -7,6 +7,7 @@ export type BacktestParams = {
   amount: number
   date: Date
   mode: InvestmentMode
+  stepUpPer: number
 }
 
 /** What loads when there is nothing in the URL: a run that produces a chart on
@@ -16,6 +17,7 @@ export const DEFAULTS: BacktestParams = {
   amount: 5000,
   date: new Date(2020, 0, 1),
   mode: 'monthly',
+  stepUpPer: 0,
 }
 
 const MODES: InvestmentMode[] = ['lumpsum', ...SIP_FREQUENCIES.map((f) => f.value)]
@@ -35,20 +37,23 @@ export const readParams = (search: string): BacktestParams => {
   const amount = Number(q.get('amount'))
   const date = parseISO(q.get('from') ?? '')
   const mode = MODES.find((m) => m === q.get('mode'))
+  const stepUpPer = Number(q.get('stepUpPer'))
 
   return {
     market,
     amount: Number.isFinite(amount) && amount > 0 ? amount : DEFAULTS.amount,
     date: isValid(date) ? date : DEFAULTS.date,
     mode: mode ?? DEFAULTS.mode,
+    stepUpPer: Number.isFinite(stepUpPer) && stepUpPer > 0 && stepUpPer <= 100 ? stepUpPer : 0,
   }
 }
 
-export const toSearch = ({ market, amount, date, mode }: BacktestParams) =>
+export const toSearch = ({ market, amount, date, mode, stepUpPer }: BacktestParams) =>
   '?' +
   new URLSearchParams({
     market,
     amount: String(amount),
     from: format(date, 'yyyy-MM-dd'),
     mode,
+    ...(stepUpPer > 0 && { stepUpPer: String(stepUpPer) }),
   })

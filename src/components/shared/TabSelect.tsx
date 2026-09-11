@@ -12,11 +12,11 @@ type TabSelectProps = {
   disabled?: boolean
 }
 
-export const TabSelect = ({ options, value, onChange, className, label = "Select Investement Type", disabled = false }: TabSelectProps) => (
-  <div className="flex flex-col gap-2 w-fit">
-    <Label className="ml-1">{label}</Label>
+export const TabSelect = ({ options, value, onChange, className, label = "", disabled = false }: TabSelectProps) => (
+  <div className="flex flex-col gap-2">
+    {label && <Label className="ml-1 text-xs text-slate-300">{label}</Label>}
     <Tabs value={value} onValueChange={(next) => onChange(next as string)} >
-      <TabsList className={cn('bg-black gap-2', className)}>
+      <TabsList className={cn('bg-black gap-2 border p-0 rounded-none', className)}>
         {options.map((option) => (
           <TabsTrigger key={option.value} value={option.value} disabled={disabled} className="px-4 py-2 rounded-none hover:text-foreground/60 dark:hover:text-muted-foreground data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground dark:data-active:border-transparent data-active:hover:text-primary-foreground dark:data-active:hover:text-primary-foreground">
             {option.label}

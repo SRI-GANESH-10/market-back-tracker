@@ -1,3 +1,3 @@
-export const FieldCard = ({ children }: { children: React.ReactNode }) => (
-  <div className="border p-4">{children}</div>
+export const FieldCard = ({ children , className}: { children: React.ReactNode , className?: string }) => (
+  <div className={`border p-4 ${className || ''}`}>{children}</div>
 )

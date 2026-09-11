@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
+import { differenceInYears } from "date-fns"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,6 +19,10 @@ export const compactInr = (n: number) =>
 
 export const pct = (n: number) => `${(n * 100).toFixed(2)}%`
 
-export const signedInr = (n: number) => (n >= 0 ? '+' : '−') + inr(Math.abs(n))
+export const signedInr = (n: number) => (n >= 0 ? '+' : '-') + inr(Math.abs(n))
 
-export const signedPct = (n: number) => (n >= 0 ? '+' : '−') + pct(Math.abs(n))
+export const signedPct = (n: number) => (n >= 0 ? '+' : '-') + pct(Math.abs(n))
+
+export const instalmentOn = (base: number, stepUpPct: number, start: Date, when: Date) =>
+  stepUpPct ? base * (1 + stepUpPct / 100) ** differenceInYears(when, start) : base
+
