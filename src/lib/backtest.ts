@@ -14,6 +14,8 @@ export type SeriesData = {
   value: number
   avgPrice: number
   returnPct: number
+  isBuy: boolean
+  amount: number
 }
 
 export type Buy = { date: string; amount: number }
@@ -88,6 +90,9 @@ export const runBacktest = ({
     }
 
     const value = units * row.close
+    const lastBuy = buys.at(-1)
+    const isBuy = lastBuy?.date === row.date
+
     seriesData.push({
       date: row.date,
       close: row.close,
@@ -96,7 +101,10 @@ export const runBacktest = ({
       value,
       avgPrice: invested / units,
       returnPct: value / invested - 1,
+      isBuy,
+      amount: isBuy ? lastBuy!.amount : 0,
     })
+    console.log('seriesData', seriesData)
   }
 
   const startRow = rows[startIdx]

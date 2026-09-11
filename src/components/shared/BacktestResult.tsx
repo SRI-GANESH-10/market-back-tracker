@@ -3,6 +3,7 @@ import type { ReturnMetric, SeriesData } from '@/lib/backtest'
 import { FieldCard } from '@/components/shared/FieldCard'
 import { PortfolioHero } from '@/components/shared/PortfolioHero'
 import { GrowthChart } from '@/components/shared/GrowthChart'
+import { PurchaseTable } from '@/components/shared/PurchaseTable'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,8 @@ export const BacktestResult = ({
       {children}
 
       {seriesData.length ? (
-        <FieldCard>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2.03fr_1fr]">
+        <FieldCard className="flex h-[440px] flex-col">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
             <div className="flex items-center gap-1.5">
               <Button
@@ -78,8 +80,15 @@ export const BacktestResult = ({
               </span>
             </div>
           </div>
-          <GrowthChart data={visibleData} />
+          <div className="min-h-0 flex-1">
+            <GrowthChart data={visibleData} />
+          </div>
         </FieldCard>
+
+        <FieldCard className="h-[440px]">
+          <PurchaseTable data={visibleData.filter((d) => d.isBuy).reverse()} className="h-full" />
+        </FieldCard>
+        </div>
       ) : null}
     </>
   )

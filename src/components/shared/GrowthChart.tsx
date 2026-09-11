@@ -20,7 +20,7 @@ type GrowthChartProps = {
 }
 
 export const GrowthChart = ({ data }: GrowthChartProps) => (
-  <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full sm:h-[300px]">
+  <ChartContainer config={chartConfig} className="aspect-auto h-full w-full">
     <LineChart accessibilityLayer data={data} margin={{ left: 12, right: 12 }}>
       <CartesianGrid vertical={false} />
       <XAxis

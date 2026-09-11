@@ -86,7 +86,7 @@ export const BackTester = () => {
   }, [submitted])
 
   return (
-    <div className="p-4 space-y-6 sm:p-8">
+    <div className="p-4 space-y-12 sm:p-8">
       <NavBar shareUrl={submitted ? window.location.href : undefined}>
         <ComboBox
           options={MARKETS}
