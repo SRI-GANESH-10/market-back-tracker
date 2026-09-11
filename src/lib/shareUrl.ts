@@ -12,7 +12,7 @@ export type BacktestParams = {
 /** What loads when there is nothing in the URL: a run that produces a chart on
  *  the very first click, rather than an empty form. */
 export const DEFAULTS: BacktestParams = {
-  market: 'nifty50',
+  market: 'niftybees',
   amount: 5000,
   date: new Date(2020, 0, 1),
   mode: 'monthly',

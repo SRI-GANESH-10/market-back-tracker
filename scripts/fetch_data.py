@@ -2,11 +2,15 @@ import yfinance as yf
 import json
 import os
 
-# Registry of indices — add new ones here later, that's it
+# Registry of ETFs — add new ones here later, that's it.
+# ETFs rather than raw indices: they are what you can actually buy, and
+# auto_adjust folds their dividends back into the close.
 INDICES = {
-    "nifty50": {"ticker": "^NSEI", "label": "Nifty 50", "start": "1996-01-01"},
-    "midcap150": {"ticker": "NIFTYMIDCAP150.NS", "label": "Nifty Midcap 150", "start": "1996-01-01"},
-    "smallcap250": {"ticker": "NIFTYSMLCAP250.NS", "label": "Nifty Smallcap 250", "start": "1996-01-01"},
+    "niftybees": {"ticker": "NIFTYBEES.NS", "label": "Nifty 50 BeES", "start": "2001-12-28"},
+    "juniorbees": {"ticker": "JUNIORBEES.NS", "label": "Nifty Next 50 Junior BeES", "start": "2003-02-21"},
+    "bankbees": {"ticker": "BANKBEES.NS", "label": "Nifty Bank BeES", "start": "2004-01-01"},
+    "goldbees": {"ticker": "GOLDBEES.NS", "label": "Gold BeES", "start": "2007-01-01"},
+    "mid150bees": {"ticker": "MID150BEES.NS", "label": "Nifty Midcap 150 BeES", "start": "2019-01-31"},
 }
 
 OUTPUT_DIR = "public/data"

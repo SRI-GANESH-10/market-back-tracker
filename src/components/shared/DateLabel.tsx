@@ -13,12 +13,12 @@ type DateLabelProps = {
     onChange: (date: Date | undefined) => void
     className?: string
     label?: string
-    /** Earliest selectable month — defaults to Jan 2005, the oldest index data we have. */
+    /** Earliest selectable month — Jan 2009, as far back as Yahoo serves these ETFs. */
     startMonth?: Date
     endMonth?: Date
 }
 
-export const DateLabel = ({ date, onChange, className, label = "Select Date", startMonth = new Date(2005, 0), endMonth = new Date() }: DateLabelProps) => {
+export const DateLabel = ({ date, onChange, className, label = "Select Date", startMonth = new Date(2009, 0), endMonth = new Date() }: DateLabelProps) => {
     const [open, setOpen] = useState(false)
 
     return (

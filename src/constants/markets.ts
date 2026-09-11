@@ -1,7 +1,9 @@
 export const MARKETS = [
-  { value: 'nifty50', label: 'Nifty 50' },
-  { value: 'midcap150', label: 'Nifty Midcap 150' },
-  { value: 'smallcap250', label: 'Nifty Smallcap 250' },
+  { value: 'niftybees', label: 'Nifty 50 BeES' },
+  { value: 'juniorbees', label: 'Nifty Next 50 Junior BeES' },
+  { value: 'bankbees', label: 'Nifty Bank BeES' },
+  { value: 'goldbees', label: 'Gold BeES' },
+  { value: 'mid150bees', label: 'Nifty Midcap 150 BeES' },
 ] as const
 
 export const INVESTEMENT_TYPES = [
