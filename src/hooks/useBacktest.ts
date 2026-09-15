@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSelectMarketType } from '@/hooks/useSelectMarketType'
+import { useNavHistory } from '@/hooks/useNavHistory'
 import { runBacktest, type InvestmentMode } from '@/lib/backtest'
 
 export const useBacktest = (
@@ -9,10 +9,10 @@ export const useBacktest = (
   mode: InvestmentMode,
   stepUpPer: number
 ) => {
-  const rows = useSelectMarketType(market)
+  const { rows, error } = useNavHistory(market)
 
   return useMemo(
-    () => ({ rows, ...runBacktest({ rows, startDate: date, amount, mode, stepUpPer }) }),
-    [rows, date, amount, mode, stepUpPer]
+    () => ({ rows, error, ...runBacktest({ rows, startDate: date, amount, mode, stepUpPer }) }),
+    [rows, error, date, amount, mode, stepUpPer]
   )
 }

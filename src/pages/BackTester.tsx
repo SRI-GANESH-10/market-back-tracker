@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { NavBar } from '@/components/shared/NavBar'
 import { ComboBox } from '@/components/shared/ComboBox'
-import { INVESTEMENT_TYPES, MARKETS, SIP_FREQUENCIES } from '@/constants/markets'
+import { INVESTEMENT_TYPES, SIP_FREQUENCIES } from '@/constants/markets'
 import { ChipSelect } from '@/components/shared/ChipSelect'
 import { InputLabel } from '@/components/shared/Inputlabel'
 import { TabSelect } from '@/components/shared/TabSelect'
 import { DateLabel } from '@/components/shared/DateLabel'
 import { useBacktest } from '@/hooks/useBacktest'
+import { useFunds } from '@/hooks/useFunds'
 import { Button } from '@/components/ui/button'
 import { RotateCcw } from 'lucide-react'
 import { FieldCard } from '@/components/shared/FieldCard'
@@ -46,14 +47,24 @@ export const BackTester = () => {
   const [runId, setRunId] = useState(0)
 
   const [speed, setSpeed] = useState(1)
+  const { funds, error: fundsError, loading: fundsLoading } = useFunds()
 
-  const { seriesData, returnMetric } = useBacktest(
+  const { seriesData, returnMetric, rows, error, firstDate, lastDate } = useBacktest(
     submitted?.market ?? null,
     submitted?.date,
     submitted?.amount ?? 0,
     submitted?.mode ?? 'lumpsum',
     submitted?.stepUpPer ?? 0
   )
+
+  const emptyReason =
+    !submitted || seriesData.length
+      ? null
+      : error
+        ? error
+        : !rows.length
+          ? null
+          : `This fund has NAV data only from ${format(parseISO(firstDate!), 'dd MMM yyyy')} to ${format(parseISO(lastDate!), 'dd MMM yyyy')}. Pick a start date in that range.`
 
   const isSip = investmentType === 'sip'
   const canRun = !!market && !!date && Number(amount) > 0
@@ -89,11 +100,13 @@ export const BackTester = () => {
     <div className="p-4 space-y-12 sm:p-8">
       <NavBar shareUrl={submitted ? window.location.href : undefined}>
         <ComboBox
-          options={MARKETS}
+          options={funds.map((f) => ({ value: f.code, label: f.name }))}
           value={market}
           onChange={setMarket}
-          placeholder="Select a market"
-          className="w-40 sm:w-56"
+          placeholder={fundsLoading ? 'Loading funds…' : 'Search a fund'}
+          emptyMessage={fundsError ?? 'No funds found.'}
+          disabled={fundsLoading || !!fundsError}
+          className="w-56 sm:w-80"
         />
         <Button size="sm" disabled={!canRun} onClick={handleBacktest} className={'rounded-none'}>
           Backtest
@@ -186,6 +199,9 @@ export const BackTester = () => {
           </FieldCard>
         </div>
       </BacktestResult>
+      {emptyReason && (
+        <p className="text-center text-sm text-muted-foreground">{emptyReason}</p>
+      )}
     </div>
   )
 }

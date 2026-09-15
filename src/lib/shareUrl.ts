@@ -1,5 +1,5 @@
 import { format, isValid, parseISO } from 'date-fns'
-import { MARKETS, SIP_FREQUENCIES } from '@/constants/markets'
+import { SIP_FREQUENCIES } from '@/constants/markets'
 import type { InvestmentMode } from '@/lib/backtest'
 
 export type BacktestParams = {
@@ -13,7 +13,7 @@ export type BacktestParams = {
 /** What loads when there is nothing in the URL: a run that produces a chart on
  *  the very first click, rather than an empty form. */
 export const DEFAULTS: BacktestParams = {
-  market: 'niftybees',
+  market: '122639', // Parag Parikh Flexi Cap - Direct Plan - Growth
   amount: 5000,
   date: new Date(2020, 0, 1),
   mode: 'monthly',
@@ -30,9 +30,9 @@ const MODES: InvestmentMode[] = ['lumpsum', ...SIP_FREQUENCIES.map((f) => f.valu
 export const readParams = (search: string): BacktestParams => {
   const q = new URLSearchParams(search)
 
-  const market = MARKETS.some((m) => m.value === q.get('market'))
-    ? q.get('market')!
-    : DEFAULTS.market
+  // a scheme code, not a name from a fixed list -- the 12k funds arrive at
+  // runtime, so the shape is all that can be checked here
+  const market = /^\d{1,8}$/.test(q.get('market') ?? '') ? q.get('market')! : DEFAULTS.market
 
   const amount = Number(q.get('amount'))
   const date = parseISO(q.get('from') ?? '')

@@ -59,12 +59,13 @@ export const runBacktest = ({
   stepUpPer: number
 }) => {
   const firstDate = rows[0]?.date
+  const lastDate = rows.at(-1)?.date
 
 
   const startIdx = startDate ? rows.findIndex((row) => parseISO(row.date) >= startDate) : -1
 
   if (startIdx === -1 || amount <= 0) {
-    return { seriesData: [] as SeriesData[], buys: [] as Buy[], firstDate }
+    return { seriesData: [] as SeriesData[], buys: [] as Buy[], firstDate, lastDate }
   }
 
   const step = STEP[mode]
@@ -104,7 +105,6 @@ export const runBacktest = ({
       isBuy,
       amount: isBuy ? lastBuy!.amount : 0,
     })
-    console.log('seriesData', seriesData)
   }
 
   const startRow = rows[startIdx]
@@ -129,6 +129,7 @@ export const runBacktest = ({
     startRow,
     endRow,
     firstDate,
+    lastDate,
     years,
     returnMetric,
   }

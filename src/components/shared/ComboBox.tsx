@@ -18,6 +18,7 @@ type ComboBoxProps = {
   emptyMessage?: string
   disabled?: boolean
   className?: string
+  limit?: number
 }
 
 export const ComboBox = ({
@@ -28,6 +29,7 @@ export const ComboBox = ({
   emptyMessage = "No results found.",
   disabled = false,
   className,
+  limit = 50,
 }: ComboBoxProps) => {
   const items = options as ComboBoxOption[]
   const selected = items.find((option) => option.value === value) ?? null
@@ -37,6 +39,7 @@ export const ComboBox = ({
       items={items}
       value={selected}
       onValueChange={(option) => onChange(option?.value ?? null)}
+      limit={limit}
     >
       <ComboboxInput
         placeholder={placeholder}
@@ -53,6 +56,11 @@ export const ComboBox = ({
             </ComboboxItem>
           )}
         </ComboboxList>
+        {items.length > limit && (
+          <p className="border-t px-2 py-1.5 text-xs text-muted-foreground">
+            Showing {limit} of {items.length.toLocaleString('en-IN')} — type to narrow
+          </p>
+        )}
       </ComboboxContent>
     </Combobox>
   )
